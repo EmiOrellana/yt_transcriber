@@ -3,7 +3,7 @@ from src.config.settings import VIDEO_DIR
 from src.config.settings import AUDIO_DIR
 import os
 
-def download_video(url: str, format: str = "bestvideo+bestaudio") -> str:
+def download_video(url: str, format: str = "bestvideo+bestaudio", browser: str = "firefox") -> str:
 
     """
     Download a video from a URL.
@@ -23,11 +23,20 @@ def download_video(url: str, format: str = "bestvideo+bestaudio") -> str:
             "outtmpl": f"{VIDEO_DIR}/%(title)s.%(ext)s",
             "restrictfilenames": True,
             "noplaylist": True,
+            "quiet": True,
+            "js_runtimes": {
+                "node": {
+                    "node": {}
+                }
+            },
+            "remote_components": [
+                "ejs:github"
+            ],
             "format": format,
         }
 
         if use_cookies:
-            ydl_opts["cookiefile"] = "cookies.txt"
+            ydl_opts["cookiesfrombrowser"] = (browser, None, None, None)
         
         # Download the video
         with YoutubeDL(ydl_opts) as ydl:
@@ -46,7 +55,7 @@ def download_video(url: str, format: str = "bestvideo+bestaudio") -> str:
     return video_path
 
 
-def download_audio(url: str, codec: str = "wav") -> str:
+def download_audio(url: str, codec: str = "wav", browser: str = "firefox") -> str:
 
     """
     Download audio from a video URL and convert it to the desired codec.
@@ -63,16 +72,25 @@ def download_audio(url: str, codec: str = "wav") -> str:
             "outtmpl": f"{AUDIO_DIR}/%(title)s.%(ext)s",
             "restrictfilenames": True,
             "noplaylist": True, 
-            "quiet": False,
+            "quiet": True,
+            "js_runtimes": {
+                "node": {
+                    "node": {}
+                }
+            },
+            "remote_components": [
+                "ejs:github"
+            ],
             "format": "bestaudio/best",
             "postprocessors": [{
                 "key": "FFmpegExtractAudio",
                 "preferredcodec": codec,
             }],
+            
         }
 
         if use_cookies:
-            ydl_opts["cookiefile"] = "cookies.txt"
+            ydl_opts["cookiesfrombrowser"] = (browser, None, None, None)
 
         # Download the audio
         with YoutubeDL(ydl_opts) as ydl:
@@ -92,4 +110,23 @@ def download_audio(url: str, codec: str = "wav") -> str:
         print(e)
         return _download(use_cookies=True)
     
- 
+from yt_dlp import YoutubeDL
+
+
+"""
+def download(url: str):
+    ydl_opts = {
+        "cookiesfrombrowser": ("firefox", None, None, None),
+        "js_runtimes": {
+            "node": {
+                "node": {}
+            }
+        },
+        "remote_components": [
+            "ejs:github"
+        ]
+    }
+
+    with YoutubeDL(ydl_opts) as ydl:
+        ydl.download([url])
+"""
