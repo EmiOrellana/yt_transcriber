@@ -7,6 +7,9 @@ venv/
 # Temporary files
 tmp/
 
+# Models
+models/
+
 # OS
 .DS_Store
 
