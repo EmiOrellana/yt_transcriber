@@ -2,9 +2,9 @@ from yt_dlp import YoutubeDL
 from src.config.settings import VIDEO_DIR
 from src.config.settings import AUDIO_DIR
 import os
-import subprocess
 
-def download_video(url: str) -> str:
+def download_video(url: str, format: str = "bestvideo+bestaudio") -> str:
+
     """
     Download a video from a URL.
 
@@ -14,48 +14,82 @@ def download_video(url: str) -> str:
     Returns:
         str: Path to the downloaded video file.
     """
-    # Options
+
     os.makedirs(VIDEO_DIR, exist_ok=True)
 
-    ydl_opts = {
-        "outtmpl": f"{VIDEO_DIR}/%(title)s.%(ext)s",
-        "restrictfilenames": True,
-        "noplaylist": True,
-    }
-    
-    # Download the video
-    with YoutubeDL(ydl_opts) as ydl:
-        info_dict = ydl.extract_info(url, download=True)
-        video_path = ydl.prepare_filename(info_dict)
+    def _download(use_cookies: bool) -> str:
+        # Options
+        ydl_opts = {
+            "outtmpl": f"{VIDEO_DIR}/%(title)s.%(ext)s",
+            "restrictfilenames": True,
+            "noplaylist": True,
+            "format": format,
+        }
+
+        if use_cookies:
+            ydl_opts["cookiefile"] = "cookies.txt"
+        
+        # Download the video
+        with YoutubeDL(ydl_opts) as ydl:
+            info_dict = ydl.extract_info(url, download=True)
+            video_path = ydl.prepare_filename(info_dict)
+
+    try:
+        print("Downloading without cookies...")
+        video_path = _download(use_cookies=False)
+    except Exception as e:
+        print("First attempt failed, retrying with cookies...")
+        print(e)
+        video_path = _download(use_cookies=True)
 
     # Return the video file path
     return video_path
 
-def extract_audio(video_path: str) -> str:
-    """
-    Extract audio from a video file.
 
-    Args:
-        video_path (str): Path to the video file.
+def download_audio(url: str, codec: str = "wav") -> str:
 
-    Returns:
-        str: Path to the extracted audio file.
     """
-    # Options
+    Download audio from a video URL and convert it to the desired codec.
+
+    First tries without cookies (works in most cases).
+    If it fails due to bot detection, retries using browser cookies.
+    """
+
     os.makedirs(AUDIO_DIR, exist_ok=True)
 
-    filename = os.path.basename(video_path)
-    name, _ = os.path.splitext(filename)
-    audio_path = os.path.join(AUDIO_DIR, name + ".wav")
+    def _download(use_cookies: bool) -> str:
+        # Options
+        ydl_opts = {
+            "outtmpl": f"{AUDIO_DIR}/%(title)s.%(ext)s",
+            "restrictfilenames": True,
+            "noplaylist": True, 
+            "quiet": False,
+            "format": "bestaudio/best",
+            "postprocessors": [{
+                "key": "FFmpegExtractAudio",
+                "preferredcodec": codec,
+            }],
+        }
 
-    # Extract audio
-    subprocess.run([
-        "ffmpeg",
-        "-i", video_path,
-        "-vn",
-        "-acodec", "pcm_s16le", "-ar", "16000", "-ac", "1",
-        audio_path
-    ], check=True)    
+        if use_cookies:
+            ydl_opts["cookiefile"] = "cookies.txt"
 
-    # Return the audio file path
-    return audio_path   
+        # Download the audio
+        with YoutubeDL(ydl_opts) as ydl:
+            info = ydl.extract_info(url, download=True)
+            path = ydl.prepare_filename(info)
+
+        return os.path.splitext(path)[0] + f".{codec}"
+
+    # First attempt without cookies
+    try:
+        print("Downloading without cookies...")
+        return _download(use_cookies=False)
+    
+    # If it fails, retry with cookies
+    except Exception as e:
+        print("First attempt failed, retrying with cookies...")
+        print(e)
+        return _download(use_cookies=True)
+    
+ 
