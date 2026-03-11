@@ -2,9 +2,70 @@
 
 Extracts, transcribes, and translates audio from YouTube videos using a modular Python pipeline.
 
-
 ## Status
 Project initialization.
+
+---
+
+# Table of Contents
+
+- [Overview](#overview)
+- [Quick Start](#quick-start)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Roadmap](#roadmap)
+- [Contributing](#contributing)
+- [License](#license)
+
+---
+
+# Overview
+
+Brief explanation of what the project does.
+
+Example:
+
+This application allows users to download audio from online media and process it for transcription.
+
+Main features:
+
+- Download audio from video sources
+- Convert media using FFmpeg
+- Prepare audio files for transcription
+- CLI interface
+- Future GUI support
+
+---
+
+# Quick Start
+
+Clone the repository and install the required dependencies.
+
+```bash
+git clone https://github.com/yourusername/project-name.git
+cd project-name
+```
+
+Install Python dependencies:
+
+```bash
+pip install -r requirements.txt
+```
+
+Run the CLI tool:
+
+```bash
+python main.py <video_url>
+```
+
+Example:
+
+```bash
+python main.py https://youtube.com/example_video
+```
+
+---
 
 # Requirements
 
@@ -90,3 +151,53 @@ If the commands `node` or `ffmpeg` are not recognized:
 1. Verify they are installed.
 2. Check that their directories are included in your system **PATH environment variable**.
 3. Restart your terminal after modifying the PATH.
+
+---
+
+# Installation
+
+Installation instructions will be added here.
+
+Example steps that will likely appear here:
+
+```
+git clone <repository>
+cd project
+pip install -r requirements.txt
+```
+
+---
+
+# Usage
+
+Instructions on how to use the application will be documented here.
+
+Example:
+
+```
+python main.py <video_url>
+```
+
+---
+
+# Roadmap
+
+Planned features for future development.
+
+- CLI tool
+- Browser cookie selection
+- GUI interface
+- Batch transcription
+- API support
+
+---
+
+# Contributing
+
+Guidelines for contributing will be added here.
+
+---
+
+# License
+
+License information will be added here.
