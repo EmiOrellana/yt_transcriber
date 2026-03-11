@@ -1,8 +1,17 @@
+# Virtual environment
+venv/
+
+# Temporary files
+tmp/
+
+# OS
+.DS_Store
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[codz]
 *$py.class
-
+*.pyc
 # C extensions
 *.so
 
