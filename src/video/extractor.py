@@ -1,15 +1,26 @@
+import os
+import logging
 from yt_dlp import YoutubeDL
 from src.config.settings import VIDEO_DIR
 from src.config.settings import AUDIO_DIR
-import os
 
-def download_video(url: str, format: str = "bestvideo+bestaudio", browser: str = "firefox") -> str:
+
+
+logger = logging.getLogger(__name__)
+
+
+# Video download function with retry mechanism for bot detection 
+def download_video(url: str, format: str, browser: str) -> str:
 
     """
     Download a video from a URL.
+    First tries without cookies (works in most cases).
+    If it fails due to bot detection, retries using browser cookies.
 
     Args:
         url (str): URL of the video.
+        format (str): Format of the video to download. Default is "bestvideo+bestaudio" (best quality).
+        browser (str): Browser to use for downloading (for cookies). Default is "firefox".
 
     Returns:
         str: Path to the downloaded video file.
@@ -43,25 +54,37 @@ def download_video(url: str, format: str = "bestvideo+bestaudio", browser: str =
             info_dict = ydl.extract_info(url, download=True)
             video_path = ydl.prepare_filename(info_dict)
 
+        return video_path
+
+    # First attempt without cookies
     try:
-        print("Downloading without cookies...")
-        video_path = _download(use_cookies=False)
+        logger.info("Downloading without cookies...")
+        return _download(use_cookies=False)
+    
+    # If it fails, retry with cookies
     except Exception as e:
-        print("First attempt failed, retrying with cookies...")
-        print(e)
-        video_path = _download(use_cookies=True)
-
-    # Return the video file path
-    return video_path
+        logger.exception("Download without cookies failed")
+        logger.warning("First attempt failed, retrying with cookies...")
+        return _download(use_cookies=True)
 
 
-def download_audio(url: str, codec: str = "wav", browser: str = "firefox") -> str:
+# Audio download function with retry mechanism for bot detection
+def download_audio(url: str, format: str, codec: str, browser: str) -> str:
 
     """
     Download audio from a video URL and convert it to the desired codec.
 
     First tries without cookies (works in most cases).
     If it fails due to bot detection, retries using browser cookies.
+
+    Args:
+        url (str): URL of the video.
+        format (str): Format of the audio to download. Default is "bestaudio/best" (best quality).
+        codec (str): Audio codec to convert to. Default is "wav".
+        browser (str): Browser to use for downloading (for cookies). Default is "firefox
+    
+    Returns:
+        str: Path to the downloaded audio file.
     """
 
     os.makedirs(AUDIO_DIR, exist_ok=True)
@@ -81,7 +104,7 @@ def download_audio(url: str, codec: str = "wav", browser: str = "firefox") -> st
             "remote_components": [
                 "ejs:github"
             ],
-            "format": "bestaudio/best",
+            "format": format,
             "postprocessors": [{
                 "key": "FFmpegExtractAudio",
                 "preferredcodec": codec,
@@ -95,38 +118,17 @@ def download_audio(url: str, codec: str = "wav", browser: str = "firefox") -> st
         # Download the audio
         with YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=True)
-            path = ydl.prepare_filename(info)
+            audio_path = ydl.prepare_filename(info)
 
-        return os.path.splitext(path)[0] + f".{codec}"
+        return os.path.splitext(audio_path)[0] + f".{codec}"
 
     # First attempt without cookies
     try:
-        print("Downloading without cookies...")
+        logger.info("Downloading without cookies...")
         return _download(use_cookies=False)
     
     # If it fails, retry with cookies
     except Exception as e:
-        print("First attempt failed, retrying with cookies...")
-        print(e)
+        logger.exception("Download without cookies failed")
+        logger.warning("First attempt failed, retrying with cookies...")        
         return _download(use_cookies=True)
-    
-from yt_dlp import YoutubeDL
-
-
-"""
-def download(url: str):
-    ydl_opts = {
-        "cookiesfrombrowser": ("firefox", None, None, None),
-        "js_runtimes": {
-            "node": {
-                "node": {}
-            }
-        },
-        "remote_components": [
-            "ejs:github"
-        ]
-    }
-
-    with YoutubeDL(ydl_opts) as ydl:
-        ydl.download([url])
-"""
