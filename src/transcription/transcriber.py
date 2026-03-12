@@ -2,11 +2,13 @@ import whisper
 import os
 from src.config.settings import TRANSCRIPTION_DIR
 from src.config.settings import SUBTITLE_DIR
+import torch
 
-model = whisper.load_model("small", download_root="models")
+device = "cuda" if torch.cuda.is_available() else "cpu"
+model = whisper.load_model("small", download_root="models", device=device)
 
 
-def transcribe(audio_path: str, language: str = "en") -> dict:
+def transcribe(audio_path: str, language: str = "en") -> tuple[str, str]:
 
     """
     Transcribe an audio file using the Whisper model.
@@ -16,18 +18,21 @@ def transcribe(audio_path: str, language: str = "en") -> dict:
         language (str): The language of the audio. Default is "en" (English).
 
     Returns:
-        dict: The transcription result from the Whisper model.
+        tuple[str, str]: A tuple containing the paths to the saved transcript and timestamps text files.
     """
 
-    result = model.transcribe(audio_path, language=language)
-
-    save_transcript(result, audio_path)
-    save_timestamps(result, audio_path)
-
-    return result
+    print(f"Whisper running on: {device}")
     
+    result = model.transcribe(audio_path, language=language)
+    filename = os.path.splitext(os.path.basename(audio_path))[0]
 
-def save_transcript(result: dict, audio_path: str) -> str:
+    transcript_path = save_transcript(result, filename)
+    segments_path = save_segments(result, filename)
+
+    return (transcript_path, segments_path)
+
+
+def save_transcript(result: dict, filename: str) -> str:
 
     """
     Save the full transcript to a text file.
@@ -40,18 +45,17 @@ def save_transcript(result: dict, audio_path: str) -> str:
         str: The path to the saved transcript text file.
     """
 
-    filename = os.path.splitext(os.path.basename(audio_path))[0]
     os.makedirs(TRANSCRIPTION_DIR, exist_ok=True)
+    path = os.path.join(TRANSCRIPTION_DIR, f"{filename}_transcript.txt")
 
     transcript = result["text"]
 
-    with open(os.path.join(TRANSCRIPTION_DIR, f"{filename}_transcript.txt"), "w") as f:
+    with open(path, "w", encoding="utf-8") as f:
         f.write(transcript)
 
-    return os.path.join(TRANSCRIPTION_DIR, f"{filename}_transcript.txt")
+    return path
 
-    
-def save_timestamps(result: dict, audio_path: str) -> str:
+def save_segments(result: dict, filename: str) -> str:
 
     """
     Save the full transcript with timestamps to a text file.
@@ -64,16 +68,39 @@ def save_timestamps(result: dict, audio_path: str) -> str:
         str: The path to the saved timestamps text file.
     """
 
-    filename = os.path.splitext(os.path.basename(audio_path))[0]
     os.makedirs(SUBTITLE_DIR, exist_ok=True)
 
+    path = os.path.join(SUBTITLE_DIR, f"{filename}_segments.srt")
     segments  = result["segments"]
 
-    with open(os.path.join(SUBTITLE_DIR, f"{filename}_timestamps.txt"), "w") as f:
-        for segment in segments:
-            start = segment["start"]
-            end = segment["end"]
-            text = segment["text"]
-            f.write(f"[{start:.2f} - {end:.2f}] {text}\n")
+    def _format_timestamp(seconds: float) -> str:
 
-    return os.path.join(SUBTITLE_DIR, f"{filename}_timestamps.txt")     
+        total_seconds = int(seconds)
+        hours = total_seconds // 3600
+        minutes = (total_seconds % 3600) // 60
+        secs = total_seconds % 60
+        millis = int((seconds - total_seconds) * 1000)
+
+        return f"{hours:02}:{minutes:02}:{secs:02},{millis:03}"
+
+    def _segments_to_srt(segments):
+        srt = []
+
+        for i, seg in enumerate(segments, start=1):
+            start = _format_timestamp(seg["start"])
+            end = _format_timestamp(seg["end"])
+            text = seg["text"].strip()
+
+            srt.append(f"{i}")
+            srt.append(f"{start} --> {end}")
+            srt.append(text)
+            srt.append("")
+
+        return "\n".join(srt)
+
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(_segments_to_srt(segments))
+
+    return path
+
+

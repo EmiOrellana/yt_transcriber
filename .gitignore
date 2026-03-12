@@ -9,7 +9,7 @@ tmp/
 
 # Directories
 models/
-exports/
+export/
 
 # OS
 .DS_Store

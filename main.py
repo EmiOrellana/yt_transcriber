@@ -9,8 +9,8 @@ def main():
 
     print("Transcribing audio...")
     transcription = transcribe(path, "es")
+    print("Transcription saved to file.")
     print(transcription)
-    print(path)
 
 if __name__ == "__main__":
     main()
