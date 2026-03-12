@@ -4,7 +4,6 @@ from src.transcription.transcriber import transcribe
 from src.audio.cleaner import cleanup_audio_file
 
 
-
 logging.basicConfig(
     level=logging.INFO,
     format="%(asctime)s | %(levelname)s | %(name)s | %(message)s"

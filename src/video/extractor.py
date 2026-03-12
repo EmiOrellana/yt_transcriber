@@ -5,7 +5,6 @@ from src.config.settings import VIDEO_DIR
 from src.config.settings import AUDIO_DIR
 
 
-
 logger = logging.getLogger(__name__)
 
 

@@ -6,7 +6,6 @@ from src.config.settings import TRANSCRIPTION_DIR
 from src.config.settings import SUBTITLE_DIR
 
 
-
 logger = logging.getLogger(__name__)
 device = "cuda" if torch.cuda.is_available() else "cpu"
 model_instance = None
