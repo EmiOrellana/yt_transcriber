@@ -1,6 +1,7 @@
-# Youtube Video Transcriptor
+# Youtube Video Transcriber
 
 Extracts, transcribes, and translates audio from YouTube videos using a modular Python pipeline.
+Also supports video and audio downloading. Future GUI/WebApp in development.
 
 ## Status
 Project initialization.

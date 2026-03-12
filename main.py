@@ -1,4 +1,6 @@
 import logging
+import torch
+import yt_dlp
 from src.video.extractor import download_audio, download_video
 from src.transcription.transcriber import transcribe
 from src.audio.cleaner import cleanup_audio_file
@@ -38,7 +40,7 @@ def main(
 
             if save_transcript:
                 logger.info("Transcribing audio...")
-                transcription = transcribe(audio_path, language=language, model_name=model_name)
+                transcription = transcribe(audio_path, language=language, model_name=model_name) # transcribe returns a tuple with the paths to the transcript and segments files
                 logger.info(f"Transcript saved to {transcription[0]}")
                 logger.info(f"Segments saved to {transcription[1]}")
 
@@ -46,8 +48,27 @@ def main(
                 logger.info("Cleaning up audio file...")
                 cleanup_audio_file(audio_path=audio_path)
 
+    except yt_dlp.utils.DownloadError as e:
+        logger.error(f"Download error (invalid URL, private or unavailable video): {e}")
+
+    except torch.cuda.OutOfMemoryError as e:
+        logger.error(f"GPU out of memory. Try using a smaller Whisper model: {e}")
+
+    except RuntimeError as e:
+        logger.error(f"Whisper model error: {e}")
+
+    except FileNotFoundError as e:
+        logger.error(f"File not found, the download may have failed: {e}")
+
+    except PermissionError as e:
+        logger.error(f"Permission denied when writing to the output directory: {e}")
+
+    except ValueError as e:
+        logger.error(f"Invalid parameter, check the language code or model name: {e}")
+        
     except Exception as e:
-        logger.exception("An error occurred: {e}")
+        # Fallback error handling for any other unexpected exceptions
+        logger.exception(f"Unexpected error: {e}")
 
 if __name__ == "__main__":
     main()
