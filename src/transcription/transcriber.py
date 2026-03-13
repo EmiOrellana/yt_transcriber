@@ -26,6 +26,56 @@ def get_model(model_name:str) -> whisper.Whisper:
     return model_instance
 
 
+# Helper function to format timestamps in SRT format (HH:MM:SS,mmm)
+def _format_timestamp(seconds: float) -> str:
+
+    total_seconds = int(seconds)
+    hours = total_seconds // 3600
+    minutes = (total_seconds % 3600) // 60
+    secs = total_seconds % 60
+    millis = int((seconds - total_seconds) * 1000)
+
+    return f"{hours:02}:{minutes:02}:{secs:02},{millis:03}"
+
+
+# Helper function to save the segments with timestamps to a text file in SRT format
+def _segments_to_srt(segments):
+    srt = []
+
+    for i, seg in enumerate(segments, start=1):
+        start = _format_timestamp(seg["start"])
+        end = _format_timestamp(seg["end"])
+        text = " ".join(seg["text"].split()).replace("-->", "→")
+
+        srt.append(f"{i}")
+        srt.append(f"{start} --> {end}")
+        srt.append(text)
+        srt.append("")
+
+    return "\n".join(srt)
+
+
+# Helper function to save the transcript to a text file
+def _save_transcript(result: dict, path: str) -> None:
+
+    """Save the full transcript to a text file."""
+
+    os.makedirs(TRANSCRIPTION_DIR, exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(result["text"])
+
+
+# Helper function to save the segments with timestamps to a text file
+def _save_segments(result: dict, path: str) -> None:
+
+    """Save the full transcript with timestamps to a text file."""
+
+
+    os.makedirs(SEGMENTS_DIR, exist_ok=True)
+    with open(path, "w", encoding="utf-8") as f:
+        f.write(_segments_to_srt(result["segments"]))
+
+
 # Transcription function
 def transcribe(audio_path: str, language: str, model_name: str) -> tuple[str, str]:
 
@@ -50,62 +100,24 @@ def transcribe(audio_path: str, language: str, model_name: str) -> tuple[str, st
         return (transcript_path, segments_path)
 
     model = get_model(model_name)
+
     logger.info(f"Transcribing {filename} with model '{model_name}'...")
+
     result = model.transcribe(audio_path, language=language)
+
     logger.info(f"Transcription complete")    
 
     transcript = _save_transcript(result, transcript_path)
-    segments= _save_segments(result, segments_path)
+    segments = _save_segments(result, segments_path)
+
     logger.info(f"Transcription saved to {transcript_path}")
     logger.info(f"Segments saved to {segments_path}")
 
     return (transcript, segments)
 
 
-# Helper function to save the transcript to a text file
-def _save_transcript(result: dict, path: str) -> None:
-
-    """Save the full transcript to a text file."""
-
-    os.makedirs(TRANSCRIPTION_DIR, exist_ok=True)
-    with open(path, "w", encoding="utf-8") as f:
-        f.write(result["text"])
 
 
-
-# Helper function to save the segments with timestamps to a text file
-def _save_segments(result: dict, path: str) -> None:
-
-    """Save the full transcript with timestamps to a text file."""
-
-    def _format_timestamp(seconds: float) -> str:
-
-        total_seconds = int(seconds)
-        hours = total_seconds // 3600
-        minutes = (total_seconds % 3600) // 60
-        secs = total_seconds % 60
-        millis = int((seconds - total_seconds) * 1000)
-
-        return f"{hours:02}:{minutes:02}:{secs:02},{millis:03}"
-
-    def _segments_to_srt(segments):
-        srt = []
-
-        for i, seg in enumerate(segments, start=1):
-            start = _format_timestamp(seg["start"])
-            end = _format_timestamp(seg["end"])
-            text = " ".join(seg["text"].split()).replace("-->", "→")
-
-            srt.append(f"{i}")
-            srt.append(f"{start} --> {end}")
-            srt.append(text)
-            srt.append("")
-
-        return "\n".join(srt)
-
-    os.makedirs(SEGMENTS_DIR, exist_ok=True)
-    with open(path, "w", encoding="utf-8") as f:
-        f.write(_segments_to_srt(result["segments"]))
 
 
 

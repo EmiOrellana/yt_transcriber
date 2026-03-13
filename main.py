@@ -3,6 +3,7 @@ import torch
 import yt_dlp
 from src.video.extractor import download_audio, download_video
 from src.transcription.transcriber import transcribe
+from src.transcription.api_transcriber import transcribe_api
 from src.audio.cleaner import cleanup_audio_file
 
 
@@ -18,7 +19,8 @@ logger = logging.getLogger(__name__)
 def main(
     save_video: bool = False, 
     save_audio: bool = False, 
-    save_transcript: bool = True, 
+    save_transcript: bool = True,
+    use_api: bool = True, 
     url: str = "https://www.youtube.com/watch?v=kSv6qlPtvR0",
     browser: str = "firefox",
     video_format: str = "bestvideo+bestaudio",
@@ -35,7 +37,10 @@ def main(
             audio_path = download_audio(url, format=audio_format, codec=codec, browser=browser)
 
             if save_transcript:
-                transcribe(audio_path, language=language, model_name=model_name) # transcribe returns a tuple with the paths to the transcript and segments files
+                if use_api:
+                    transcribe_api(audio_path, language=language)
+                else:
+                    transcribe(audio_path, language=language, model_name=model_name) # transcribe returns a tuple with the paths to the transcript and segments files
 
             if not save_audio:
                 logger.info("Cleaning up audio file...")
