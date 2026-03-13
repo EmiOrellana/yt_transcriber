@@ -3,7 +3,7 @@ import logging
 import whisper
 import torch
 from src.config.settings import TRANSCRIPTION_DIR
-from src.config.settings import SUBTITLE_DIR
+from src.config.settings import SEGMENTS_DIR
 
 
 logger = logging.getLogger(__name__)
@@ -40,43 +40,43 @@ def transcribe(audio_path: str, language: str, model_name: str) -> tuple[str, st
     Returns:
         tuple[str, str]: A tuple containing the paths to the saved transcript and timestamps text files.
     """
-
-    model = get_model(model_name)
-
-    result = model.transcribe(audio_path, language=language)
     filename = os.path.splitext(os.path.basename(audio_path))[0]
 
-    transcript_path = _save_transcript(result, filename)
-    segments_path = _save_segments(result, filename)
+    transcript_path = os.path.join(TRANSCRIPTION_DIR, f"{filename}_transcript.txt")
+    segments_path = os.path.join(SEGMENTS_DIR, f"{filename}_segments.srt")
 
-    return (transcript_path, segments_path)
+    if os.path.exists(transcript_path) and os.path.exists(segments_path):
+        logger.info(f"Transcription for this video already exists: {filename}")
+        return (transcript_path, segments_path)
+
+    model = get_model(model_name)
+    logger.info(f"Transcribing {filename} with model '{model_name}'...")
+    result = model.transcribe(audio_path, language=language)
+    logger.info(f"Transcription complete")    
+
+    transcript = _save_transcript(result, transcript_path)
+    segments= _save_segments(result, segments_path)
+    logger.info(f"Transcription saved to {transcript_path}")
+    logger.info(f"Segments saved to {segments_path}")
+
+    return (transcript, segments)
 
 
 # Helper function to save the transcript to a text file
-def _save_transcript(result: dict, filename: str) -> str:
+def _save_transcript(result: dict, path: str) -> None:
 
     """Save the full transcript to a text file."""
 
     os.makedirs(TRANSCRIPTION_DIR, exist_ok=True)
-
-    path = os.path.join(TRANSCRIPTION_DIR, f"{filename}_transcript.txt")
-    transcript = result["text"]
-
     with open(path, "w", encoding="utf-8") as f:
-        f.write(transcript)
+        f.write(result["text"])
 
-    return path
 
 
 # Helper function to save the segments with timestamps to a text file
-def _save_segments(result: dict, filename: str) -> str:
+def _save_segments(result: dict, path: str) -> None:
 
     """Save the full transcript with timestamps to a text file."""
-
-    os.makedirs(SUBTITLE_DIR, exist_ok=True)
-
-    path = os.path.join(SUBTITLE_DIR, f"{filename}_segments.srt")
-    segments  = result["segments"]
 
     def _format_timestamp(seconds: float) -> str:
 
@@ -103,9 +103,9 @@ def _save_segments(result: dict, filename: str) -> str:
 
         return "\n".join(srt)
 
+    os.makedirs(SEGMENTS_DIR, exist_ok=True)
     with open(path, "w", encoding="utf-8") as f:
-        f.write(_segments_to_srt(segments))
+        f.write(_segments_to_srt(result["segments"]))
 
-    return path
 
 
