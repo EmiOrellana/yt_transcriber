@@ -20,13 +20,13 @@ def main(
     save_video: bool = False, 
     save_audio: bool = False, 
     save_transcript: bool = True,
-    use_api: bool = True, 
-    url: str = "https://www.youtube.com/watch?v=kSv6qlPtvR0",
+    use_api: bool = False, 
+    url: str = "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     browser: str = "firefox",
     video_format: str = "bestvideo+bestaudio",
     audio_format: str = "bestaudio/best",
     codec: str = "wav",
-    language: str = "es",
+    language: str = "en",
     model_name: str = "small"
 ):
     try:
@@ -49,7 +49,7 @@ def main(
     except yt_dlp.utils.DownloadError as e:
         logger.error(f"Download error (invalid URL, private or unavailable video): {e}")
 
-    except torch.cuda.OutOfMemoryError as e:
+    except torch.cuda.OutOfMemoryError as e:    
         logger.error(f"GPU out of memory. Try using a smaller Whisper model: {e}")
 
     except RuntimeError as e:
