@@ -54,7 +54,7 @@ def _save_segments(segments, path: str) -> None:
         f.write(_segments_to_srt(segments))
 
 
-# 
+# Transcription function using OpenAI API
 def transcribe_api(audio_path: str, language: str) -> tuple[str, str]:
 
     """

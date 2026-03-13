@@ -76,7 +76,7 @@ def _save_segments(result: dict, path: str) -> None:
         f.write(_segments_to_srt(result["segments"]))
 
 
-# Transcription function
+# Transcription function using the Whisper model
 def transcribe(audio_path: str, language: str, model_name: str) -> tuple[str, str]:
 
     """
