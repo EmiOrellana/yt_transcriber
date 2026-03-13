@@ -92,10 +92,10 @@ def transcribe_api(audio_path: str, language: str) -> tuple[str, str]:
 
     logger.info(f"Transcription completed")
 
-    transcript = _save_transcript(result.text, transcript_path)
-    segments = _save_segments(result.segments, segments_path)
+    _save_transcript(result.text, transcript_path)
+    _save_segments(result.segments, segments_path)
 
     logger.info(f"Transcription saved to {transcript_path}")
     logger.info(f"Segments saved to {segments_path}")
 
-    return (transcript, segments)
+    return (transcript_path, segments_path)
