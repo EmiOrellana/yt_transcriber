@@ -5,6 +5,7 @@ from src.video.extractor import download_audio, download_video
 from src.transcription.transcriber import transcribe
 from src.transcription.api_transcriber import transcribe_api
 from src.audio.cleaner import cleanup_audio_file
+from src.cli.parser import parse_args
 
 
 logging.basicConfig(
@@ -18,7 +19,7 @@ logger = logging.getLogger(__name__)
 # PIPELINE
 def main(
     save_video: bool = False, 
-    save_audio: bool = True, 
+    save_audio: bool = False, 
     save_transcript: bool = True,
     use_api: bool = False, 
     url: str = "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
@@ -69,4 +70,17 @@ def main(
         logger.exception(f"Unexpected error: {e}")
 
 if __name__ == "__main__":
-    main()
+    args = parse_args()
+    main(
+        save_video = args.save_video,
+        save_audio = args.save_audio,
+        save_transcript = args.save_transcript,
+        use_api = args.use_api,
+        url = args.url,
+        browser= args.browser,
+        video_format = args.video_format,        
+        audio_format = args.audio_format,
+        codec = args.codec,
+        language = args.language,
+        model_name = args.model_name
+    )
