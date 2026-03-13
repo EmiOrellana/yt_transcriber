@@ -18,7 +18,7 @@ logger = logging.getLogger(__name__)
 # PIPELINE
 def main(
     save_video: bool = False, 
-    save_audio: bool = False, 
+    save_audio: bool = True, 
     save_transcript: bool = True,
     use_api: bool = False, 
     url: str = "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
@@ -38,7 +38,7 @@ def main(
 
             if save_transcript:
                 if use_api:
-                    transcribe_api(audio_path, language=language)
+                    transcribe_api(audio_path, language=language) # transcribe_api returns a tuple with the paths to the transcript and segments files
                 else:
                     transcribe(audio_path, language=language, model_name=model_name) # transcribe returns a tuple with the paths to the transcript and segments files
 

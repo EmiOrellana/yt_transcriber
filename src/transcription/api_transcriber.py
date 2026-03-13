@@ -7,7 +7,25 @@ from src.config.settings import OPENAI_API_KEY, TRANSCRIPTION_DIR, SEGMENTS_DIR
 logger = logging.getLogger(__name__)
 
 # Initialize OpenAI client
-client = OpenAI(api_key=OPENAI_API_KEY)
+client = None
+
+
+# Avoid unnecessary initialization if transcription is not needed
+def _get_client() -> OpenAI:
+    global client
+    if client is None:
+        if not OPENAI_API_KEY:
+            raise ValueError("OPENAI_API_KEY is not set. Add it to your .env file.")
+        client = OpenAI(api_key=OPENAI_API_KEY)
+    return client
+
+
+# Helper function to convert audio files to MP3 format using ffmpeg (for files larger than 25MB)
+def _convert_to_mp3(audio_path: str) -> str:
+    base = os.path.splitext(audio_path)[0]
+    mp3_path = f"{base}.mp3"
+    os.system(f'ffmpeg -i "{audio_path}" -q:a 2 "{mp3_path}"')
+    return mp3_path
 
 
 # Helper function to format timestamps in SRT format (HH:MM:SS,mmm)
@@ -68,9 +86,6 @@ def transcribe_api(audio_path: str, language: str) -> tuple[str, str]:
         tuple[str, str]: The transcription text and the segment file path.
     """
 
-    if not OPENAI_API_KEY:
-        raise ValueError("OPENAI_API_KEY is not set. Add it to your .env file.")
-    
     filename = os.path.splitext(os.path.basename(audio_path))[0]
 
     transcript_path = os.path.join(TRANSCRIPTION_DIR, f"{filename}_transcript.txt")
@@ -80,6 +95,21 @@ def transcribe_api(audio_path: str, language: str) -> tuple[str, str]:
         logger.info(f"Transcription for this video already exists: {filename}")
         return (transcript_path, segments_path)
     
+    client = _get_client()
+    file_size_mb = os.path.getsize(audio_path) / (1024 * 1024)
+    MAX_SIZE_MB = 25
+
+    original_audio_path = audio_path
+
+    if file_size_mb > MAX_SIZE_MB and not audio_path.endswith(".mp3"):
+        logger.info(f"Audio file is too large for the API ({file_size_mb:.1f}MB), converting to MP3...")
+        audio_path = _convert_to_mp3(audio_path)
+        mp3_size_mb = os.path.getsize(audio_path) / (1024 * 1024)
+        if mp3_size_mb > MAX_SIZE_MB:
+            os.remove(audio_path)  
+            raise ValueError(f"Audio file too large even after MP3 conversion ({mp3_size_mb:.1f}MB). Max is {MAX_SIZE_MB}MB.")
+        logger.info(f"Converted to MP3: {audio_path}")
+
     logger.info(f"Transcribing {filename} via OpenAI API...")
 
     with open(audio_path, "rb") as f:
@@ -91,6 +121,10 @@ def transcribe_api(audio_path: str, language: str) -> tuple[str, str]:
         )
 
     logger.info(f"Transcription completed")
+
+    if audio_path != original_audio_path:
+        os.remove(audio_path)
+        logger.info(f"Removed temporary MP3: {audio_path}")
 
     _save_transcript(result.text, transcript_path)
     _save_segments(result.segments, segments_path)
