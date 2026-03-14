@@ -15,20 +15,19 @@ client = None
 
 
 # Avoid unnecessary initialization if transcription is not needed
-def _get_client() -> OpenAI:
+def _get_client(api_key: str = None) -> OpenAI:
     global client
-    if client is None:
-        if not OPENAI_API_KEY:
-            raise ValueError("OPENAI_API_KEY is not set. Add it to your .env file.")
-        client = OpenAI(api_key=OPENAI_API_KEY)
+    key = api_key or OPENAI_API_KEY
+    if not key:
+        raise ValueError("No API key provided. Add it to your .env file or enter it in the UI.")
+    client = OpenAI(api_key=key)
     return client
-
 
 # Helper function to convert audio files to MP3 format using ffmpeg (for files larger than 25MB)
 def _convert_to_mp3(audio_path: str) -> str:
     base = os.path.splitext(audio_path)[0]
     mp3_path = f"{base}.mp3"
-    os.system(f'ffmpeg -loglevel quiet -i "{audio_path}" -q:a 2 "{mp3_path}"')
+    os.system(f'ffmpeg -loglevel quiet -y -i "{audio_path}" -q:a 2 "{mp3_path}"')
     return mp3_path
 
 
@@ -77,7 +76,7 @@ def _save_segments(segments, path: str) -> None:
 
 
 # Transcription function using OpenAI API
-def transcribe_api(audio_path: str, language: str) -> tuple[str, str]:
+def transcribe_api(audio_path: str, language: str, api_key: str = None) -> tuple[str, str]:
 
     """
     Transcribe an audio file using the Whisper model from OpenAI API.
@@ -99,7 +98,7 @@ def transcribe_api(audio_path: str, language: str) -> tuple[str, str]:
         logger.info(f"Transcription for this video already exists: {filename}")
         return (transcript_path, segments_path)
     
-    client = _get_client()
+    client = _get_client(api_key=api_key)
     file_size_mb = os.path.getsize(audio_path) / (1024 * 1024)
     MAX_SIZE_MB = 25
 
@@ -125,7 +124,7 @@ def transcribe_api(audio_path: str, language: str) -> tuple[str, str]:
         )
 
     logger.info(f"Transcription completed")
-
+    
     if audio_path != original_audio_path:
         os.remove(audio_path)
         logger.info(f"Removed temporary MP3: {audio_path}")

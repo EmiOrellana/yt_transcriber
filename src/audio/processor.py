@@ -49,6 +49,6 @@ def _extract_audio(video_path: str) -> str:
         logger.info(f"Audio already exists, skipping extraction: {audio_path}")
         return audio_path
     
-    os.system(f'ffmpeg -loglevel quiet -i "{video_path}" -q:a 2 "{audio_path}"')
+    os.system(f'ffmpeg -loglevel quiet -y -i "{video_path}" -q:a 2 "{audio_path}"')
     logger.info(f"Audio extracted to {audio_path}")
     return audio_path

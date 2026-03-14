@@ -6,7 +6,7 @@ using either a local Whisper model or the OpenAI Whisper API.
 Users may choose to download the video, audio, or just the transcript.
 
 ## Status
-Active development — CLI fully functional. GUI in planning stage.
+Active development — CLI and GUI fully functional.
 
 ---
 
@@ -43,6 +43,7 @@ The tool supports two transcription modes:
 - Lazy loading of the Whisper model (only loaded when needed, saves memory)
 - Local files support for transcription (audio and video formats)
 - Modular dependencies — install only what you need (video/audio download, local transcription, API transcription)
+- Streamlit GUI
 
 ---
 
@@ -94,6 +95,9 @@ pip install -e ".[local]"
 
 # With OpenAI API transcription
 pip install -e ".[api]"
+
+# With Streamlit GUI
+pip install -e ".[gui]"
 
 # Everything
 pip install -e ".[all]"
@@ -154,12 +158,19 @@ yt-transcriber -u "https://youtube.com/..." -t -l es -m medium
 yt-transcriber -f "path/to/file.mp4" -t
 ```
 
+### GUI
+
+To launch the Streamlit interface:
+```bash
+streamlit run app.py
+```
+
 ---
 
 ## Roadmap
 
 - [x] Local file support (audio/video)
-- [ ] Streamlit GUI
+- [x] Streamlit GUI
 - [ ] Unit tests
 
 ---

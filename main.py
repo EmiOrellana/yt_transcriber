@@ -27,8 +27,15 @@ def main(
     audio_format: str = "bestaudio/best",
     codec: str = "wav",
     language: str = "en",
-    model_name: str = "small"
+    model_name: str = "small",
+    api_key: str = None
 ):
+    
+    transcript_path = None
+    segments_path = None
+    audio_path = None
+    video_path = None
+
     try:
         if file:
             # File mode:
@@ -39,7 +46,7 @@ def main(
         else:
             # URL mode:
             if save_video:
-                download_video(url, format=video_format, browser=browser)
+                video_path = download_video(url, format=video_format, browser=browser)
 
             if save_transcript or save_audio:
                 audio_path = download_audio(url, format=audio_format, codec=codec, browser=browser)
@@ -47,14 +54,16 @@ def main(
         if save_transcript:
             if use_api:
                 from src.transcription.api_transcriber import transcribe_api
-                transcribe_api(audio_path, language=language) 
+                transcript_path, segments_path = transcribe_api(audio_path, language=language, api_key=api_key)
+                
             else:
                 from src.transcription.transcriber import transcribe
-                transcribe(audio_path, language=language, model_name=model_name)
+                transcript_path, segments_path = transcribe(audio_path, language=language, model_name=model_name)
 
             if not save_audio and not file:
                 logger.info("Cleaning up audio file...")
                 cleanup_audio_file(audio_path=audio_path)
+                audio_path = None
 
     except yt_dlp.utils.DownloadError as e:
         logger.error(f"Download error (invalid URL, private or unavailable video): {e}")
@@ -81,6 +90,13 @@ def main(
             logger.error(f"Missing dependencies: {e}")
         else:
             logger.exception(f"Unexpected error: {e}")
+
+    return {
+        "transcript": transcript_path,
+        "segments": segments_path,
+        "audio": audio_path,
+        "video": video_path,
+    }
         
         
 def cli():
