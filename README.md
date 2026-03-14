@@ -41,6 +41,7 @@ The tool supports two transcription modes:
 - Automatic audio conversion to MP3 if file exceeds API size limit
 - Skips downloading or transcribing if files already exist (no redundant processing)
 - Lazy loading of the Whisper model (only loaded when needed, saves memory)
+- Local files support for transcription (audio and video formats)
 
 ---
 
@@ -113,6 +114,7 @@ yt-transcriber -u "VIDEO_URL" [options]
 | `-l` | `--language` | Language code (default: en) |
 | `-m` | `--model-name` | Whisper model size (default: small) |
 | `-b` | `--browser` | Browser for cookie extraction (default: firefox) |
+| `-f` | `--file` | Path to a local audio/video file |
 
 ### Examples
 ```bash
@@ -130,13 +132,16 @@ yt-transcriber -u "https://youtube.com/..." -t -api
 
 # Transcribe in Spanish with medium model
 yt-transcriber -u "https://youtube.com/..." -t -l es -m medium
+
+# Transcribe a local file
+yt-transcriber -f "path/to/file.mp4" -t
 ```
 
 ---
 
 ## Roadmap
 
-- [ ] Local file support (audio/video)
+- [x] Local file support (audio/video)
 - [ ] Streamlit GUI
 - [ ] Unit tests
 
