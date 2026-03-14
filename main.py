@@ -24,7 +24,7 @@ def main(
     use_api: bool = False, 
     url: str = "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
     browser: str = "firefox",
-    video_format: str = "bestvideo+bestaudio",
+    video_format: str = "bestvideo+bestaudio/best",
     audio_format: str = "bestaudio/best",
     codec: str = "wav",
     language: str = "en",

@@ -56,7 +56,7 @@ def parse_args():
     parser.add_argument(
         "--video-format",
         type=str,
-        default="bestvideo+bestaudio",
+        default="bestvideo+bestaudio/best",
         help="Video format to download"
     )
 
