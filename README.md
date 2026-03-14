@@ -104,6 +104,8 @@ yt-transcriber -u "https://www.youtube.com/watch?v=..." -t
 # See all options
 yt-transcriber --help
 ```
+> **Note:** For GPU support, install PyTorch with CUDA before installing the local extra. 
+> Check your CUDA version with `nvidia-smi` and replace `cu124` accordingly (e.g. `cu121` for CUDA 12.1)
 
 ### Set up environment variables (Add OpenAI API key if using API mode)
 ```bash
@@ -136,8 +138,8 @@ yt-transcriber -u "VIDEO_URL" [options]
 # Transcribe a video
 yt-transcriber -u "https://youtube.com/..." -t
 
-# Download video and transcribe
-yt-transcriber -u "https://youtube.com/..." -v -t
+# Download video
+yt-transcriber -u "https://youtube.com/..." -v
 
 # Transcribe keeping audio file
 yt-transcriber -u "https://youtube.com/..." -t -a
