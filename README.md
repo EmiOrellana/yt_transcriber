@@ -89,9 +89,8 @@ yt-transcriber -u "https://www.youtube.com/watch?v=..." -t
 yt-transcriber --help
 ```
 
-# Set up environment variables
+### Set up environment variables (Add OpenAI API key if using API mode)
 cp .env.example .env
-# Add your OpenAI API key to .env (only if using --use-api)
 
 ---
 
