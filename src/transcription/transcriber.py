@@ -1,7 +1,11 @@
+try:
+    import whisper
+    import torch
+except ImportError:
+    raise ImportError("Local transcription dependencies not installed. Run: pip install -e '.[local]'")
+
 import os
 import logging
-import whisper
-import torch
 from src.config.settings import TRANSCRIPTION_DIR
 from src.config.settings import SEGMENTS_DIR
 

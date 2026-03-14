@@ -6,6 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "yt-transcriber"
 version = "0.1.0"
 description = "Download and transcribe YouTube videos"
+dependencies = ["yt-dlp", "yt-dlp-ejs", "python-dotenv", "requests"]
 
 [project.scripts]
 yt-transcriber = "main:cli"
@@ -16,3 +17,8 @@ py-modules = ["main"]
 [tool.setuptools.packages.find]
 where = ["."]
 include = ["src*"]
+
+[project.optional-dependencies]
+local = ["openai-whisper", "torch", "torchaudio"]
+api = ["openai"]
+all = ["openai-whisper", "torch", "torchaudio", "openai"]

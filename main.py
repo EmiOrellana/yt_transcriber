@@ -1,9 +1,6 @@
 import logging
-import torch
 import yt_dlp
 from src.video.extractor import download_audio, download_video
-from src.transcription.transcriber import transcribe
-from src.transcription.api_transcriber import transcribe_api
 from src.audio.cleaner import cleanup_audio_file
 from src.cli.parser import parse_args
 from src.audio.processor import prepare_audio
@@ -49,8 +46,10 @@ def main(
 
         if save_transcript:
             if use_api:
+                from src.transcription.api_transcriber import transcribe_api
                 transcribe_api(audio_path, language=language) 
             else:
+                from src.transcription.transcriber import transcribe
                 transcribe(audio_path, language=language, model_name=model_name)
 
             if not save_audio and not file:
@@ -60,11 +59,11 @@ def main(
     except yt_dlp.utils.DownloadError as e:
         logger.error(f"Download error (invalid URL, private or unavailable video): {e}")
 
-    except torch.cuda.OutOfMemoryError as e:    
-        logger.error(f"GPU out of memory. Try using a smaller Whisper model: {e}")
-
     except RuntimeError as e:
-        logger.error(f"Whisper model error: {e}")
+        if "out of memory" in str(e).lower():
+            logger.error(f"GPU out of memory. Try using a smaller Whisper model: {e}")
+        else:
+            logger.error(f"Whisper model error: {e}")
 
     except FileNotFoundError as e:
         logger.error(f"File not found, the download may have failed: {e}")
@@ -78,8 +77,9 @@ def main(
     except Exception as e:
         if "ejs" in str(e).lower():
             logger.error("Failed to download EJS challenge solver from https://github.com/yt-dlp/ejs.")
+        elif isinstance(e, ImportError):
+            logger.error(f"Missing dependencies: {e}")
         else:
-            # Fallback error handling for any other unexpected exceptions
             logger.exception(f"Unexpected error: {e}")
         
         

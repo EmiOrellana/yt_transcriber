@@ -42,6 +42,7 @@ The tool supports two transcription modes:
 - Skips downloading or transcribing if files already exist (no redundant processing)
 - Lazy loading of the Whisper model (only loaded when needed, saves memory)
 - Local files support for transcription (audio and video formats)
+- Modular dependencies — install only what you need (video/audio download, local transcription, API transcription)
 
 ---
 
@@ -80,8 +81,22 @@ source venv/Scripts/activate  # Windows
 source venv/bin/activate      # Linux/Mac
 
 # Install dependencies
-pip install -r requirements.txt
+
+# For audio and video download only
 pip install -e .
+
+# With local transcription (CPU)
+pip install -e ".[local]"
+
+# With local transcription (GPU - recommended)
+pip install torch torchaudio --index-url https://download.pytorch.org/whl/cu124
+pip install -e ".[local]"
+
+# With OpenAI API transcription
+pip install -e ".[api]"
+
+# Everything
+pip install -e ".[all]"
 
 # Transcribe a video
 yt-transcriber -u "https://www.youtube.com/watch?v=..." -t

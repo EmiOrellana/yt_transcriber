@@ -50,6 +50,7 @@ def download_video(url: str, format: str, browser: str) -> str:
         
         # Download the video
         with YoutubeDL(ydl_opts) as ydl:
+            logger.info("Fetching video info...")
             info_dict = ydl.extract_info(url, download=False)
             video_path = ydl.prepare_filename(info_dict)
 
@@ -124,6 +125,7 @@ def download_audio(url: str, format: str, codec: str, browser: str) -> str:
 
         # Download the audio
         with YoutubeDL(ydl_opts) as ydl:
+            logger.info("Fetching video info...")
             info = ydl.extract_info(url, download=False)
             audio_path = ydl.prepare_filename(info)
             audio_path = os.path.splitext(audio_path)[0] + f".{codec}"

@@ -1,6 +1,10 @@
+try:
+    from openai import OpenAI
+except ImportError:
+    raise ImportError("API transcription dependencies not installed. Run: pip install -e '.[api]'")
+
 import os
 import logging
-from openai import OpenAI
 from src.config.settings import OPENAI_API_KEY, TRANSCRIPTION_DIR, SEGMENTS_DIR
 
 
@@ -24,7 +28,7 @@ def _get_client() -> OpenAI:
 def _convert_to_mp3(audio_path: str) -> str:
     base = os.path.splitext(audio_path)[0]
     mp3_path = f"{base}.mp3"
-    os.system(f'ffmpeg -i "{audio_path}" -q:a 2 "{mp3_path}"')
+    os.system(f'ffmpeg -loglevel quiet -i "{audio_path}" -q:a 2 "{mp3_path}"')
     return mp3_path
 
 
