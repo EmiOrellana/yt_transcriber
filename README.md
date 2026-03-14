@@ -1,204 +1,146 @@
-# Youtube Video Transcriber
+# YouTube Video Transcriber
 
-Extracts, transcribes, and translates audio from YouTube videos using a modular Python pipeline.
-Also supports video and audio downloading. Future GUI/WebApp in development.
+A modular Python CLI tool to download and transcribe YouTube videos.
+Generates both plain text transcripts and `.srt` subtitle files, 
+using either a local Whisper model or the OpenAI Whisper API.
+Users may choose to download the video, audio, or just the transcript.
 
 ## Status
-Project initialization.
+Active development — CLI fully functional. GUI in planning stage.
 
 ---
 
-# Table of Contents
+## Table of Contents
 
-- [Overview](#overview)
-- [Quick Start](#quick-start)
-- [Requirements](#requirements)
-- [Installation](#installation)
-- [Usage](#usage)
-- [Roadmap](#roadmap)
-- [Contributing](#contributing)
-- [License](#license)
-
----
-
-# Overview
-
-Brief explanation of what the project does.
-
-Example:
-
-This application allows users to download audio from online media and process it for transcription.
-
-Main features:
-
-- Download audio from video sources
-- Convert media using FFmpeg
-- Prepare audio files for transcription
-- CLI interface
-- Future GUI support
+- [Overview](##overview)
+- [Features](##features)
+- [Requirements](##requirements)
+- [Installation](##installation)
+- [Usage](##usage)
+- [Roadmap](##roadmap)
+- [License](##license)
 
 ---
 
-# Quick Start
+## Overview
 
-Clone the repository and install the required dependencies.
+yt-transcriber is a command-line tool built with Python that automates the process of downloading and transcribing YouTube videos. It uses [yt-dlp](https://github.com/yt-dlp/yt-dlp) for downloading and [OpenAI Whisper](https://github.com/openai/whisper) for transcription.
 
+The tool supports two transcription modes:
+- **Local**: runs Whisper locally, no API key required, GPU recommended
+- **API**: uses the OpenAI Whisper API, faster and no GPU needed, requires an API key
+
+---
+
+## Features
+
+- Download YouTube videos and/or audio
+- Transcribe audio using a local Whisper model (offline, no API key needed)
+- Transcribe audio using the OpenAI Whisper API (faster, no GPU needed)
+- Generate plain text transcripts and `.srt` subtitle files
+- Automatic audio conversion to MP3 if file exceeds API size limit
+- Skips downloading or transcribing if files already exist (no redundant processing)
+- Lazy loading of the Whisper model (only loaded when needed, saves memory)
+
+---
+
+## Requirements
+
+- Python 3.8+
+- GPU recommended for local transcription (CUDA-compatible)
+- OpenAI API key (only if using `--use-api`)
+
+### FFmpeg
+Required for audio extraction and conversion.
 ```bash
-git clone https://github.com/yourusername/project-name.git
-cd project-name
+sudo apt install ffmpeg    # Linux
+
+brew install ffmpeg        # Mac
 ```
 
-Install Python dependencies:
+**Windows**: Download from [gyan.dev](https://www.gyan.dev/ffmpeg/builds/) and add the `bin` folder to your PATH. Verify with `ffmpeg -version`.
 
+### Node.js
+Required to bypass YouTube bot detection during downloads.
+
+Download the LTS version from [nodejs.org](https://nodejs.org) and ensure it's added to your PATH. Verify with `node -v`.
+
+---
+
+## Installation
 ```bash
+# Clone the repository
+git clone https://github.com/tuusuario/yt-transcriber.git
+cd yt-transcriber
+
+# Create and activate virtual environment
+python -m venv venv
+source venv/Scripts/activate  # Windows
+source venv/bin/activate      # Linux/Mac
+
+# Install dependencies
 pip install -r requirements.txt
+pip install -e .
+
+# Transcribe a video
+yt-transcriber -u "https://www.youtube.com/watch?v=..." -t
+
+# See all options
+yt-transcriber --help
 ```
 
-Run the CLI tool:
+# Set up environment variables
+cp .env.example .env
+# Add your OpenAI API key to .env (only if using --use-api)
 
+---
+
+## Usage
 ```bash
-python main.py <video_url>
+yt-transcriber -u "VIDEO_URL" [options]
 ```
 
-Example:
+### Options
 
+| Flag | Long | Description |
+|------|------|-------------|
+| `-u` | `--url` | YouTube video URL |
+| `-t` | `--save-transcript` | Generate transcript and .srt file |
+| `-v` | `--save-video` | Download and save the video |
+| `-a` | `--save-audio` | Save the extracted audio file |
+| `-api` | `--use-api` | Use OpenAI Whisper API instead of local model |
+| `-l` | `--language` | Language code (default: en) |
+| `-m` | `--model-name` | Whisper model size (default: small) |
+| `-b` | `--browser` | Browser for cookie extraction (default: firefox) |
+
+### Examples
 ```bash
-python main.py https://youtube.com/example_video
+# Transcribe a video
+yt-transcriber -u "https://youtube.com/..." -t
+
+# Download video and transcribe
+yt-transcriber -u "https://youtube.com/..." -v -t
+
+# Transcribe keeping audio file
+yt-transcriber -u "https://youtube.com/..." -t -a
+
+# Transcribe using OpenAI API
+yt-transcriber -u "https://youtube.com/..." -t -api
+
+# Transcribe in Spanish with medium model
+yt-transcriber -u "https://youtube.com/..." -t -l es -m medium
 ```
 
 ---
 
-# Requirements
+## Roadmap
 
-Before running the application, make sure the following dependencies are installed and available in your system.
-
----
-
-## Node.js
-
-This project requires **Node.js** to run some components used by the application.
-
-### Installation
-
-Download Node.js from the official website:
-
-https://nodejs.org
-
-Install the **LTS version**, recommended for most users.
-
-During installation, ensure that **Node.js is added to your system PATH**.
-
-### Verify installation
-
-Run the following command in your terminal:
-
-```bash
-node -v
-```
-
-You should see a version number similar to:
-
-```
-v20.x.x
-```
-
-If the command is not recognized, make sure Node.js was correctly added to the system PATH.
+- [ ] Local file support (audio/video)
+- [ ] Streamlit GUI
+- [ ] Unit tests
 
 ---
 
-## FFmpeg
+## License
 
-The application requires **FFmpeg** for audio processing and media conversion.
-
-It is used to:
-
-- Extract audio from downloaded media
-- Convert audio formats
-- Prepare audio for transcription
-
-### Installation
-
-Download FFmpeg from the official website:
-
-https://ffmpeg.org/download.html
-
-After downloading:
-
-1. Extract the files
-2. Add the **`bin` directory** to your system PATH
-
-Example path:
-
-```
-C:\ffmpeg\bin
-```
-
-### Verify installation
-
-Run the following command:
-
-```bash
-ffmpeg -version
-```
-
-If correctly installed, you should see information about the FFmpeg build and version.
-
----
-
-## Troubleshooting
-
-If the commands `node` or `ffmpeg` are not recognized:
-
-1. Verify they are installed.
-2. Check that their directories are included in your system **PATH environment variable**.
-3. Restart your terminal after modifying the PATH.
-
----
-
-# Installation
-
-Installation instructions will be added here.
-
-Example steps that will likely appear here:
-
-```
-git clone <repository>
-cd project
-pip install -r requirements.txt
-```
-
----
-
-# Usage
-
-Instructions on how to use the application will be documented here.
-
-Example:
-
-```
-python main.py <video_url>
-```
-
----
-
-# Roadmap
-
-Planned features for future development.
-
-- CLI tool
-- Browser cookie selection
-- GUI interface
-- Batch transcription
-- API support
-
----
-
-# Contributing
-
-Guidelines for contributing will be added here.
-
----
-
-# License
-
-License information will be added here.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
