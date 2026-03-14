@@ -6,6 +6,7 @@ from src.transcription.transcriber import transcribe
 from src.transcription.api_transcriber import transcribe_api
 from src.audio.cleaner import cleanup_audio_file
 from src.cli.parser import parse_args
+from src.audio.processor import prepare_audio
 
 
 logging.basicConfig(
@@ -23,6 +24,7 @@ def main(
     save_transcript: bool = False,
     use_api: bool = False, 
     url: str = "https://www.youtube.com/watch?v=dQw4w9WgXcQ",
+    file: str = None,
     browser: str = "firefox",
     video_format: str = "bestvideo+bestaudio/best",
     audio_format: str = "bestaudio/best",
@@ -31,19 +33,27 @@ def main(
     model_name: str = "small"
 ):
     try:
-        if save_video:
-            download_video(url, format=video_format, browser=browser)
+        if file:
+            # File mode:
+            if any([save_video, save_audio, browser != "firefox", video_format != "bestvideo+bestaudio/best", audio_format != "bestaudio/best", codec != "wav"]):
+                logger.warning("File mode: --save-video, --save-audio, --browser, --video-format, --audio-format and --codec are ignored")
+            audio_path = prepare_audio(file)
+        
+        else:
+            # URL mode:
+            if save_video:
+                download_video(url, format=video_format, browser=browser)
 
-        if save_transcript or save_audio:
-            audio_path = download_audio(url, format=audio_format, codec=codec, browser=browser)
+            if save_transcript or save_audio:
+                audio_path = download_audio(url, format=audio_format, codec=codec, browser=browser)
 
-            if save_transcript:
-                if use_api:
-                    transcribe_api(audio_path, language=language) # transcribe_api returns a tuple with the paths to the transcript and segments files
-                else:
-                    transcribe(audio_path, language=language, model_name=model_name) # transcribe returns a tuple with the paths to the transcript and segments files
+        if save_transcript:
+            if use_api:
+                transcribe_api(audio_path, language=language) 
+            else:
+                transcribe(audio_path, language=language, model_name=model_name)
 
-            if not save_audio:
+            if not save_audio and not file:
                 logger.info("Cleaning up audio file...")
                 cleanup_audio_file(audio_path=audio_path)
 
@@ -82,7 +92,8 @@ def cli():
         audio_format=args.audio_format,
         codec=args.codec,
         language=args.language,
-        model_name=args.model_name
+        model_name=args.model_name,
+        file=args.file
     )
 
 

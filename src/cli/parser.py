@@ -31,12 +31,22 @@ def parse_args():
         help="Use OpenAI Whisper API instead of local model. Requires OPENAI_API_KEY in .env"
     )
 
-    parser.add_argument(
+    group = parser.add_mutually_exclusive_group()
+
+    group.add_argument(
         "-u", "--url",
         type=str,
-        default="https://www.youtube.com/watch?v=dQw4w9WgXcQ",
-        help="YouTube video URL to download and/or transcribe (default: find out)",
-        metavar=""
+        default=None,
+        metavar="",
+        help="YouTube video URL to download and/or transcribe"
+    )
+
+    group.add_argument(
+        "-f", "--file",
+        type=str,
+        default=None,
+        metavar="",
+        help="Path to a local audio/video file to transcribe"
     )
 
     parser.add_argument(
