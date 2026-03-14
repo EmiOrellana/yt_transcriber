@@ -65,7 +65,7 @@ def download_video(url: str, format: str, browser: str) -> str:
 
     # First attempt without cookies
     try:
-        logger.info("Downloading without cookies...")
+        logger.info("Downloading video without cookies...")
         return _download(use_cookies=False)
     
     # If it fails, retry with cookies
@@ -126,20 +126,21 @@ def download_audio(url: str, format: str, codec: str, browser: str) -> str:
         with YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
             audio_path = ydl.prepare_filename(info)
+            audio_path = os.path.splitext(audio_path)[0] + f".{codec}"
 
         if not os.path.exists(audio_path):
             with YoutubeDL(ydl_opts) as ydl:
                 logger.info("Downloading audio...")
                 ydl.download([url])
             logger.info(f"Downloaded audio {codec} saved to {audio_path}.")
-            return os.path.splitext(audio_path)[0] + f".{codec}"
-        
+            return audio_path
+
         logger.info(f"Audio {codec} already exists at {audio_path}, skipping download.")
-        return os.path.splitext(audio_path)[0] + f".{codec}"
+        return audio_path
 
     # First attempt without cookies
-    try:
-        logger.info("Downloading without cookies...")
+    try:    
+        logger.info("Downloading audio without cookies...")
         return _download(use_cookies=False)
     
     # If it fails, retry with cookies

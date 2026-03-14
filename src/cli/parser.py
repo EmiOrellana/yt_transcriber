@@ -1,6 +1,10 @@
 import argparse
 
 
+def str_to_bool(v: str) -> bool:
+    return v.lower() in ("true", "1", "yes")
+
+
 def parse_args():
 
     parser = argparse.ArgumentParser(
@@ -9,28 +13,28 @@ def parse_args():
 
     parser.add_argument(
         "-v", "--save-video",
-        type=bool,
+        type=str_to_bool,
         default=False,
         help="Download and save the video"
     )
 
     parser.add_argument(
         "-a", "--save-audio",
-        type=bool,
+        type=str_to_bool,
         default=False,
         help="Download and save the audio"
     )
 
     parser.add_argument(
         "-t", "--save-transcript",
-        type=bool,
+        type=str_to_bool,
         default=True,
         help="Save transcript and segments files"
     )
 
     parser.add_argument(
         "-api", "--use-api",
-        type=bool,
+        type=str_to_bool,
         default=False,
         help="Use OpenAI API for transcription. You need to set the OPENAI_API_KEY env variable for this to work"
     )
