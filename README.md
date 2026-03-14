@@ -12,13 +12,13 @@ Active development — CLI fully functional. GUI in planning stage.
 
 ## Table of Contents
 
-- [Overview](##overview)
-- [Features](##features)
-- [Requirements](##requirements)
-- [Installation](##installation)
-- [Usage](##usage)
-- [Roadmap](##roadmap)
-- [License](##license)
+- [Overview](#overview)
+- [Features](#features)
+- [Requirements](#requirements)
+- [Installation](#installation)
+- [Usage](#usage)
+- [Roadmap](#roadmap)
+- [License](#license)
 
 ---
 
@@ -90,7 +90,9 @@ yt-transcriber --help
 ```
 
 ### Set up environment variables (Add OpenAI API key if using API mode)
+```bash
 cp .env.example .env
+```
 
 ---
 
