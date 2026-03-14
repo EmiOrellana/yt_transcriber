@@ -74,11 +74,15 @@ def main(
 
     except ValueError as e:
         logger.error(f"Invalid parameter, check the language code or model name: {e}")
-        
-    except Exception as e:
-        # Fallback error handling for any other unexpected exceptions
-        logger.exception(f"Unexpected error: {e}")
 
+    except Exception as e:
+        if "ejs" in str(e).lower():
+            logger.error("Failed to download EJS challenge solver from https://github.com/yt-dlp/ejs.")
+        else:
+            # Fallback error handling for any other unexpected exceptions
+            logger.exception(f"Unexpected error: {e}")
+        
+        
 def cli():
     args = parse_args()
     main(

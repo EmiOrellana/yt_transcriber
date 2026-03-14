@@ -62,7 +62,7 @@ brew install ffmpeg        # Mac
 **Windows**: Download from [gyan.dev](https://www.gyan.dev/ffmpeg/builds/) and add the `bin` folder to your PATH. Verify with `ffmpeg -version`.
 
 ### Node.js
-Required to bypass YouTube bot detection during downloads.
+Required for yt-dlp JavaScript runtime support. **Version 22.6+ required.**
 
 Download the LTS version from [nodejs.org](https://nodejs.org) and ensure it's added to your PATH. Verify with `node -v`.
 

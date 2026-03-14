@@ -105,7 +105,7 @@ def download_audio(url: str, format: str, codec: str, browser: str) -> str:
             "quiet": True,
             "js_runtimes": {
                 "node": {
-                    "node": {}
+                    "node": {"node": "node"}
                 }
             },
             "remote_components": [
